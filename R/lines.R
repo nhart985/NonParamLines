@@ -68,7 +68,6 @@ supsmu_fit=function(x,y,span=NULL) {
   for(i in 2:N) {
     yhat[i]=update_lm_predict()
   }
-
 }
 
 
