@@ -1,0 +1,20 @@
+---
+title: "NonParamLines Vignette"
+author: "Nicholas Hartman"
+date: "11/23/2021"
+output: pdf_document
+---
+
+```{r}
+x=rnorm(100)
+y=rnorm(100)
+all.equal(predict(loess(y~x,surface="direct")),loess_fit(x,y))
+plot(bench::mark(predict(loess(y~x,surface="direct")),loess_fit(x,y)),type="boxplot")
+```
+
+```{r}
+x=rnorm(100)
+y=x+rnorm(100)
+all.equal(supsmu_fit(x,y,span=0.1),supsmu(x,y,span=0.1)$y)
+```
+
