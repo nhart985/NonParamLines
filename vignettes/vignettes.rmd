@@ -5,16 +5,82 @@ date: "11/23/2021"
 output: pdf_document
 ---
 
+\section*{Load NonParamLines Package}
+
 ```{r}
-x=rnorm(100)
-y=rnorm(100)
-all.equal(predict(loess(y~x,surface="direct")),loess_fit(x,y))
-plot(bench::mark(predict(loess(y~x,surface="direct")),loess_fit(x,y)),type="boxplot")
+devtools::install_github("nhart985/NonParamLines")
 ```
+
+\section*{LOESS Smoother (Cleveland, 1979)}
+
+\subsection*{Example 1: A Weak Linear Relationship}
+
+\noindent Side-by-Side Plots:
+
+```{r}
+set.seed(1)
+x=(1:500)
+y=x+rnorm(500,5,500)
+par(mfrow=c(1,2))
+plot(x,y,main="My Implementation")
+lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3)
+plot(x,y,main="Stats Package Implementation")
+lines(x,predict(stats::loess(y~x)),col=4,lwd=3)
+```
+
+\noindent Confirmation of Correctness Using all.equal():
+
+```{r}
+all.equal(loess_fit(x,y),predict(loess(y~x,surface="direct")))
+```
+
+\subsection*{Example 2: A More Complicated Relationship}
+
+\noindent Side-by-Side Plots:
+
+```{r}
+set.seed(1)
+x=seq(0,10,length.out=500)
+y=sin(x)+rnorm(500,0,0.5)
+plot(x,y)
+par(mfrow=c(1,2))
+plot(x,y,main="My Implementation")
+lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3)
+plot(x,y,main="Stats Package Implementation")
+lines(x,predict(stats::loess(y~x)),col=4,lwd=3)
+```
+
+\noindent Confirmation of Correctness Using all.equal():
+
+```{r}
+all.equal(NonParamLines::loess_fit(x,y),predict(stats::loess(y~x,surface="direct")))
+```
+
+\noindent The above code outputs TRUE, confirming that the predictions from my LOESS implementation match (within numerical error) those produced by R's stats package.
+
+\subsection*{Computational Efficiency Comparison}
+
+\section*{Friedman's Super Smoother ((Friedman, 1984)) with Fixed Span}
 
 ```{r}
 x=rnorm(100)
 y=x+rnorm(100)
 all.equal(supsmu_fit(x,y,span=0.1),supsmu(x,y,span=0.1)$y)
+```
+
+\section*{Friedman's Super Smoother ((Friedman, 1984)) with Variable Span}
+
+```{r}
+set.seed(1)
+x=(1:1000)
+y=x+rnorm(1000,5,500)
+plot(supsmu_fit(x,y,bass=10)~supsmu(x,y,bass=10)$y)
+abline(0,1,col=2)
+all.equal(supsmu_fit(x,y,bass=2),supsmu(x,y,bass=2)$y)
+diff=supsmu_fit(x,y,bass=10)-supsmu(x,y,bass=10)$y
+plot(diff)
+
+plot(x,y)
+lines(sort(x),supsmu_fit(x,y,bass=2),col=4,lwd=4)
 ```
 
