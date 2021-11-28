@@ -5,82 +5,109 @@ date: "11/23/2021"
 output: pdf_document
 ---
 
-\section*{Load NonParamLines Package}
+\section{Loading the NonParamLines Package}
 
-```{r}
+```{r, message=F}
 devtools::install_github("nhart985/NonParamLines")
 ```
 
-\section*{LOESS Smoother (Cleveland, 1979)}
+\section{LOESS Smoother (Cleveland, 1979)}
 
-\subsection*{Example 1: A Weak Linear Relationship}
+\subsection{Example 1: A Weak Linear Relationship}
 
-\noindent Side-by-Side Plots:
+\noindent The smooth predictions from the loess_fit() function can be plotted on top of the data to show the general trend of the data. Here is a comparison with the loess function from the stats package in R: 
 
-```{r}
+```{r,fig.height=10}
 set.seed(1)
-x=(1:500)
-y=x+rnorm(500,5,500)
-par(mfrow=c(1,2))
-plot(x,y,main="My Implementation")
+x=(1:1000)
+y=x+rnorm(1000,5,500)
+par(mfrow=c(2,1))
+plot(x,y,main="NonParamLines Implementation")
 lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3)
-plot(x,y,main="Stats Package Implementation")
-lines(x,predict(stats::loess(y~x)),col=4,lwd=3)
+plot(x,y,main="Existing Implementation")
+lines(x,predict(stats::loess(y~x,surface="direct")),col=4,lwd=3)
 ```
 
-\noindent Confirmation of Correctness Using all.equal():
-
-```{r}
-all.equal(loess_fit(x,y),predict(loess(y~x,surface="direct")))
-```
-
-\subsection*{Example 2: A More Complicated Relationship}
-
-\noindent Side-by-Side Plots:
-
-```{r}
-set.seed(1)
-x=seq(0,10,length.out=500)
-y=sin(x)+rnorm(500,0,0.5)
-plot(x,y)
-par(mfrow=c(1,2))
-plot(x,y,main="My Implementation")
-lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3)
-plot(x,y,main="Stats Package Implementation")
-lines(x,predict(stats::loess(y~x)),col=4,lwd=3)
-```
-
-\noindent Confirmation of Correctness Using all.equal():
+\noindent The smoothed curves in the above plots look identical, and this can be confirmed using the all.equal() function:
 
 ```{r}
 all.equal(NonParamLines::loess_fit(x,y),predict(stats::loess(y~x,surface="direct")))
 ```
 
-\noindent The above code outputs TRUE, confirming that the predictions from my LOESS implementation match (within numerical error) those produced by R's stats package.
+\noindent Since the above code returns TRUE, it indicates that the predictions are equal within a very minor tolerance. 
 
-\subsection*{Computational Efficiency Comparison}
+\subsection{Example 2: A More Complicated Relationship}
 
-\section*{Friedman's Super Smoother ((Friedman, 1984)) with Fixed Span}
+\noindent In this next example, we apply the loess_fit() function to data which has a more interesting shape. We also explore the impact of changing the degree and span parameters. The former determines if local linear or quadratic models are fit (default is quadratic) and the latter determines what proportion of the data is included in each local fit:
 
-```{r}
-x=rnorm(100)
-y=x+rnorm(100)
-all.equal(supsmu_fit(x,y,span=0.1),supsmu(x,y,span=0.1)$y)
-```
-
-\section*{Friedman's Super Smoother ((Friedman, 1984)) with Variable Span}
-
-```{r}
+```{r, fig.height=5}
 set.seed(1)
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-plot(supsmu_fit(x,y,bass=10)~supsmu(x,y,bass=10)$y)
-abline(0,1,col=2)
-all.equal(supsmu_fit(x,y,bass=2),supsmu(x,y,bass=2)$y)
-diff=supsmu_fit(x,y,bass=10)-supsmu(x,y,bass=10)$y
-plot(diff)
-
-plot(x,y)
-lines(sort(x),supsmu_fit(x,y,bass=2),col=4,lwd=4)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
+par(mfrow=c(1,1))
+plot(x,y,main="NonParamLines Implementation")
+lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3) #Quadratic, Span=0.75
+lines(x,NonParamLines::loess_fit(x,y,degree=1,span=0.5),col=3,lwd=3) #Linear, Span=0.5
+legend("bottomright",legend=c("Degree=2, Span=0.75","Degree=1, Span=0.5"),
+       col=c(4,3),lwd=c(3,3),lty=c(1,1))
 ```
+
+\noindent Again, we can compare the predictions using all.equal():
+
+```{r}
+all.equal(NonParamLines::loess_fit(x,y),
+          predict(stats::loess(y~x,surface="direct")))
+all.equal(NonParamLines::loess_fit(x,y,degree=1,span=0.5),
+          predict(stats::loess(y~x,,degree=1,span=0.5,surface="direct")))
+```
+
+\noindent Since the above code returns TRUE for both settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance. 
+
+\subsection{Computational Efficiency Comparison}
+
+
+\section{Friedman's Super Smoother (Friedman, 1984) with Fixed Span}
+
+\subsection{Example}
+
+\noindent We use Example 2 from the previous section to demonstrate the 
+
+```{r,fig.height=5}
+set.seed(1)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
+par(mfrow=c(1,1))
+plot(x,y,main="NonParamLines Implementation")
+lines(x,NonParamLines::supsmu_fit(x,y,span=0.2),col=4,lwd=3) #Span=0.2
+lines(x,NonParamLines::supsmu_fit(x,y,span=0.5),col=3,lwd=3) #Span=0.5
+legend("bottomright",legend=c("Span=0.2","Span=0.5"),
+       col=c(4,3),lwd=c(3,3),lty=c(1,1))
+```
+
+
+
+```{r}
+all.equal(NonParamLines::supsmu_fit(x,y,span=0.2),supsmu(x,y,span=0.2)$y)
+all.equal(NonParamLines::supsmu_fit(x,y,span=0.5),supsmu(x,y,span=0.5)$y)
+```
+
+\section{Friedman's Super Smoother (Friedman, 1984) with Variable Span}
+
+```{r}
+# set.seed(1)
+# x=(1:1000)
+# y=x+rnorm(1000,5,500)
+# plot(supsmu_fit(x,y,bass=10)~supsmu(x,y,bass=10)$y)
+# abline(0,1,col=2)
+# all.equal(supsmu_fit(x,y,bass=2),supsmu(x,y,bass=2)$y)
+# diff=supsmu_fit(x,y,bass=10)-supsmu(x,y,bass=10)$y
+# plot(diff)
+# 
+# plot(x,y)
+# lines(sort(x),supsmu_fit(x,y,bass=2),col=4,lwd=4)
+```
+
+
+
+
 

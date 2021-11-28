@@ -1,4 +1,20 @@
 
+#'nearest
+#'
+#'Helper function for loess_fit(): Finds the indices of the span*N nearest neighbors to a given x value, where N is the total number of datapoints
+#'@param x A numeric vector corresponding to the independent variable
+#'@param span The proportion of datapoints to include in the local fit
+#'@param x_point The x value that is used to predict a y value
+#'
+#'@return A vector of indices
+#'
+#'@examples
+#'x=rnorm(100)
+#'nearest(x,0.75,x[1])
+#'
+#'
+#'@export
+#'
 nearest=function(x,span,x_point) {
   N=length(x)
   J=trunc(span*N)
@@ -7,6 +23,32 @@ nearest=function(x,span,x_point) {
   return(which(abs_diff %in% abs_diff_min))
 }
 
+#'loess_lm_predict
+#'
+#'Helper function for loess_fit(): Computes a prediction from the estimated local polynomial regression
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'@param degree The degree of the local polynomial fit (1=linear fit, 2=quadratic fit)
+#'@param x_point The x value that is used to predict a y value
+#'
+#'@return A scalar prediction of the y variable at x_point
+#'
+#'@details
+#'The local polynomial model is fit by weight least squares with a tricubic weight function.
+#'When degree=1, only an intercept and linear term for x are included in the model.
+#'When degree=2, an intercept, linear term, and quadratic term for x are included in the model.
+#'Predictions are made at x_point using the resulting estimates. See Cleveland, 1979 for details.
+#'
+#'@examples
+#'x=rnorm(100)
+#'y=x+rnorm(1000,5,500)
+#'nearest_indices=nearest(x,0.75,x[1])
+#'x_sub=x[nearest_indices]
+#'y_sub=y[nearest_indices]
+#'loess_lm_predict(x_sub,y_sub,2,x[1])
+#'
+#'@export
+#'
 loess_lm_predict=function(x,y,degree,x_point) {
   dist=abs(x-x_point)
   w=(1-(dist/max(dist))^3)^3
@@ -23,6 +65,23 @@ loess_lm_predict=function(x,y,degree,x_point) {
   return((beta%*%x_index)[,1])
 }
 
+#'loess_fit
+#'
+#'Computes LOESS local polynomial predictions (Cleveland, 1979)
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'@param degree The degree of the local polynomial fit (1=linear fit, 2=quadratic fit)
+#'@param span The proportion of datapoints to include in the local fit
+#'
+#'@return A numeric vector of LOESS predictions for the y variable at each value of the x variable
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'loess_fit(x,y,degree=2,span=0.75)
+#'
+#'@export
+#'
 loess_fit=function(x,y,degree=2,span=0.75) {
   N=length(x)
   yhat=rep(0,N)
@@ -33,12 +92,55 @@ loess_fit=function(x,y,degree=2,span=0.75) {
   return(yhat)
 }
 
+#'supsmu_lm_predict
+#'
+#'Helper function for supsmu_fit(): Computes a prediction from the estimated local linear regression
+#'@param x_point The x value that is used to predict a y value
+#'@param C The C term corresponding to the local regression estimation (Friedman, 1984)
+#'@param V The V term corresponding to the local regression estimation (Friedman, 1984)
+#'@param x_bar The local x average
+#'@param y_bar The local y average
+#'
+#'@return A scalar prediction of the y variable at x_point
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'u=get_inital_values(x,y)
+#'supsmu_lm_predict(x[1],u[1],u[2],u[3],u[4])
+#'
+#'
+#'@export
+#'
 supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
   beta1=(C/V)
   beta0=y_bar-beta1*x_bar
   return(beta0+beta1*x_point)
 }
 
+#'update_lm_predict
+#'
+#'Helper function for supsmu_fit(): Updates the estimates of the previous local linear regression without refitting the model
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'@param J The span value times the total number of datapoints
+#'@param C The C term used for regression estimation (Friedman, 1984)
+#'@param V The V term used for regression estimation (Friedman, 1984)
+#'@param index The index of the current prediction point
+#'
+#'@return A vector with four elements: (1) C term, (2) V term, (3) Local x average, and (4) Local y average
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'u=get_inital_values(x,y)
+#'u=update_lm_predict(x,y,u[1],u[2],u[3],u[4],2)
+#'
+#'@details
+#'See Friedman, 1984 for details.
+#'
+#'@export
+#'
 update_lm_predict=function(x,y,J,C,V,x_bar,y_bar,index) {
   J_half=J%/%2
   N=length(x)
@@ -55,6 +157,27 @@ update_lm_predict=function(x,y,J,C,V,x_bar,y_bar,index) {
   return(c(C,V,x_bar,y_bar))
 }
 
+#'supsmu_fit_span
+#'
+#'Helper function for supsmu_fit(): Fits a super smoother corresponding to the fixed span value
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'@param span The proportion of datapoints to include in the local fit
+#'
+#'@return A numeric vector of super smoother predictions for the y variable at each value of the x variable (sorted by the x variable)
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'supsmu_fit_span(x,y,span=0.2)
+#'
+#'
+#'@details
+#'This function is the workhorse of supsmu_fit() if a fixed span is requested.
+#'Otherwise, it serves as an intermediate helper function in the variable span algorithm (Friedman, 1984).
+#'
+#'@export
+#'
 supsmu_fit_span=function(x,y,span=0.2) {
   y=y[order(x)]
   x=sort(x)
@@ -79,6 +202,25 @@ supsmu_fit_span=function(x,y,span=0.2) {
   return(yhat)
 }
 
+#'get_initial_values
+#'
+#'Helper function for supsmu_fit(): Computes the terms needed to estimate the first local regression line
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'
+#'@return A vector with four elements: (1) C term, (2) V term, (3) Local x average, and (4) Local y average
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'get_inital_values(x,y)
+#'
+#'
+#'@details
+#'See Friedman, 1984 for details.
+#'
+#'@export
+#'
 get_initial_values=function(x,y) {
   x_bar=mean(x)
   y_bar=mean(y)
@@ -87,6 +229,24 @@ get_initial_values=function(x,y) {
   return(c(C,V,x_bar,y_bar))
 }
 
+#'supsmu_fit_three_span
+#'
+#'Helper function for supsmu_fit(): Fits super smoothers corresponding to spans of 0.5,0.2, and 0.05 with only one loop
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'
+#'@return A list with three elements: (1) an Nx3 matrix of predictions for each span,
+#'(2) an Nx3 matrix of local x averages for each span, and (3) an Nx3 matrix of V terms for each span (Friedman, 1984).
+#'N is the total number of datapoints.
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'supsmu_three_span(x,y)
+#'
+#'
+#'@export
+#'
 supsmu_fit_three_span=function(x,y) {
   y=y[order(x)]
   x=sort(x)
@@ -126,6 +286,33 @@ supsmu_fit_three_span=function(x,y) {
   return(list(matrix(c(yhat1,yhat2,yhat3),nrow=N),V,Xbar))
 }
 
+#'supsmu_fit
+#'
+#'Computes local linear predictions using Friedman's super smoother (Friedman, 1984)
+#'@param x A numeric vector corresponding to the independent variable
+#'@param y A numeric vector corresponding to the dependent variable
+#'@param span The proportion of datapoints to include in the local fit (Optional)
+#'@param bass A value between 0 and 10 that controls the smoothness of the predictions (See Details)
+#'
+#'@return A numeric vector of super smoother predictions for the y variable at each value of the x variable (sorted by the x variable)
+#'
+#'@examples
+#'x=(1:1000)
+#'y=x+rnorm(1000,5,500)
+#'supsmu_fit(x,y,span=0.2)
+#'supsmu_fit(x,y,bass=5)
+#'supsmu_fit(x,y)
+#'
+#'@details
+#'If the span argument is specified, then a fixed span is used for each x value to
+#'estimate the local linear regression line, and the bass argument is ignored. Otherwise,
+#'the span is selected for each point via cross-validation, as in Friedman, 1984. For the variable span
+#'algorithm, bass values closer to 10 result in a smoother-looking curve. Note that ties in the x variable
+#' are treated as distinct points, which is different from the behavior of stats::supsmu()
+#' (this function's method for handling ties is undocumented).
+#'
+#'@export
+#'
 supsmu_fit=function(x,y,span=NULL,bass=0) {
   if(!is.null(span)) {
     yhat=supsmu_fit_span(x,y,span)
