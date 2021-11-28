@@ -8,5 +8,5 @@ Description: Fits two of the most popular local linear smoothers using nonparame
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Suggests: knitr, rmarkdown V
+Suggests: knitr, rmarkdown
 ignetteBuilder: knitr
