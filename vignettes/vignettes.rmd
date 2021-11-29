@@ -7,34 +7,51 @@ output: pdf_document
 
 \section{Loading the NonParamLines Package}
 
-```{r, message=F}
+```{r, message=F, results='hide'}
 devtools::install_github("nhart985/NonParamLines")
 ```
 
 \section{LOESS Smoother (Cleveland, 1979)}
 
-\subsection{Example 1: A Weak Linear Relationship}
+\subsection{Example 1: Cars Data from the stats Package}
 
 \noindent The smooth predictions from the loess_fit() function can be plotted on top of the data to show the general trend of the data. Here is a comparison with the loess function from the stats package in R: 
 
 ```{r,fig.height=10}
 set.seed(1)
-x=(1:1000)
-y=x+rnorm(1000,5,500)
+data(cars)
+speed=cars$speed
+distance=cars$dist
 par(mfrow=c(2,1))
-plot(x,y,main="NonParamLines Implementation")
-lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3)
-plot(x,y,main="Existing Implementation")
-lines(x,predict(stats::loess(y~x,surface="direct")),col=4,lwd=3)
+plot(speed,distance,main="NonParamLines Implementation")
+lines(speed,NonParamLines::loess_fit(speed,distance),col=4,lwd=3)
+plot(speed,distance,main="Existing Implementation")
+lines(speed,predict(stats::loess(distance~speed,surface="direct")),col=4,lwd=3)
 ```
 
 \noindent The smoothed curves in the above plots look identical, and this can be confirmed using the all.equal() function:
 
 ```{r}
-all.equal(NonParamLines::loess_fit(x,y),predict(stats::loess(y~x,surface="direct")))
+all.equal(NonParamLines::loess_fit(speed,distance),
+          predict(stats::loess(distance~speed,surface="direct")))
 ```
 
-\noindent Since the above code returns TRUE, it indicates that the predictions are equal within a very minor tolerance. 
+\noindent Since the above code returns TRUE, it indicates that the predictions are equal within a very minor tolerance. We now check the computational speed of the implementation in comparison to the existing implementation:
+
+```{r}
+NonParamLines_Implementation=function(x,y) {
+  return(NonParamLines::loess_fit(speed,distance))
+}
+Existing_Implementation=function(x,y) {
+  return(predict(stats::loess(distance~speed,surface="direct")))
+}
+x=speed
+y=distance
+plot(bench::mark(NonParamLines_Implementation(x,y),
+     Existing_Implementation(x,y)),type="boxplot")
+```
+
+\noindent The NonParamLines implementation is about 10 times slower, which is expected since loops are unavoidable in the LOESS algorithm and the existing implementation uses C++. 
 
 \subsection{Example 2: A More Complicated Relationship}
 
@@ -45,14 +62,14 @@ set.seed(1)
 x=seq(0,10,length.out=1000)
 y=sin(x)+rnorm(1000,0,0.5)
 par(mfrow=c(1,1))
-plot(x,y,main="NonParamLines Implementation")
+plot(x,y,ylim=c(-4,2.5))
 lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3) #Quadratic, Span=0.75
 lines(x,NonParamLines::loess_fit(x,y,degree=1,span=0.5),col=3,lwd=3) #Linear, Span=0.5
 legend("bottomright",legend=c("Degree=2, Span=0.75","Degree=1, Span=0.5"),
        col=c(4,3),lwd=c(3,3),lty=c(1,1))
 ```
 
-\noindent Again, we can compare the predictions using all.equal():
+\noindent Again, we can compare the predictions to those from an existing implemention using all.equal():
 
 ```{r}
 all.equal(NonParamLines::loess_fit(x,y),
@@ -62,51 +79,99 @@ all.equal(NonParamLines::loess_fit(x,y,degree=1,span=0.5),
 ```
 
 \noindent Since the above code returns TRUE for both settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance. 
-
-\subsection{Computational Efficiency Comparison}
-
-
 \section{Friedman's Super Smoother (Friedman, 1984) with Fixed Span}
 
 \subsection{Example}
 
-\noindent We use Example 2 from the previous section to demonstrate the 
+\noindent We use Example 2 from the previous section to demonstrate the supsmu_fit() function and the span argument usage:
 
 ```{r,fig.height=5}
 set.seed(1)
 x=seq(0,10,length.out=1000)
 y=sin(x)+rnorm(1000,0,0.5)
-par(mfrow=c(1,1))
-plot(x,y,main="NonParamLines Implementation")
+plot(x,y,main="NonParamLines Implementation",ylim=c(-4,2.5))
 lines(x,NonParamLines::supsmu_fit(x,y,span=0.2),col=4,lwd=3) #Span=0.2
 lines(x,NonParamLines::supsmu_fit(x,y,span=0.5),col=3,lwd=3) #Span=0.5
 legend("bottomright",legend=c("Span=0.2","Span=0.5"),
        col=c(4,3),lwd=c(3,3),lty=c(1,1))
 ```
 
-
+\noindent We compare the predictions to those from an existing implemention using all.equal():
 
 ```{r}
 all.equal(NonParamLines::supsmu_fit(x,y,span=0.2),supsmu(x,y,span=0.2)$y)
 all.equal(NonParamLines::supsmu_fit(x,y,span=0.5),supsmu(x,y,span=0.5)$y)
 ```
 
-\section{Friedman's Super Smoother (Friedman, 1984) with Variable Span}
+\noindent Since the above code returns TRUE for both settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance. We now demonstrate the computational speed:
 
 ```{r}
-# set.seed(1)
-# x=(1:1000)
-# y=x+rnorm(1000,5,500)
-# plot(supsmu_fit(x,y,bass=10)~supsmu(x,y,bass=10)$y)
-# abline(0,1,col=2)
-# all.equal(supsmu_fit(x,y,bass=2),supsmu(x,y,bass=2)$y)
-# diff=supsmu_fit(x,y,bass=10)-supsmu(x,y,bass=10)$y
-# plot(diff)
-# 
-# plot(x,y)
-# lines(sort(x),supsmu_fit(x,y,bass=2),col=4,lwd=4)
+NonParamLines_Implementation=function(x,y) {
+  return(NonParamLines::supsmu_fit(x,y,span=0.2))
+}
+Existing_Implementation=function(x,y) {
+  return(supsmu(x,y,span=0.2)$y)
+}
+plot(bench::mark(NonParamLines_Implementation(x,y),
+     Existing_Implementation(x,y)),type="boxplot")
 ```
 
+\noindent The NonParamLines implementation is slower, which is expected since loops are unavoidable in the LOESS algorithm and the existing implementation uses C++. 
+
+\section{Friedman's Super Smoother (Friedman, 1984) with Variable Span}
+
+\noindent We now demonstrate the supsmu_fit() function using a variable span (leaving the span argument as NULL) and different choices of the bass argument:
+
+\subsection{Example 1: A Weak Linear Relationship}
+
+```{r}
+set.seed(1)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
+plot(x,y)
+lines(sort(x),supsmu_fit(x,y,bass=0),col=4,lwd=3)
+lines(sort(x),supsmu_fit(x,y,bass=4),col=3,lwd=3)
+legend("bottomright",legend=c("Bass=0","Bass=4"),
+       col=c(4,3),lwd=c(3,3),lty=c(1,1))
+```
+
+```{r}
+all.equal(NonParamLines::supsmu_fit(x,y,bass=0),supsmu(x,y,bass=0)$y)
+all.equal(NonParamLines::supsmu_fit(x,y,bass=4),supsmu(x,y,bass=4)$y)
+```
+
+\subsection*{Example 2: A More Complicated Relationship}
+
+```{r}
+set.seed(1)
+x=(1:1000)
+y=x+rnorm(1000,5,500)
+plot(x,y,ylim=c(-4,2.5))
+lines(sort(x),supsmu_fit(x,y,bass=0),col=4,lwd=3)
+lines(sort(x),supsmu_fit(x,y,bass=4),col=3,lwd=3)
+legend("bottomright",legend=c("Bass=0","Bass=4"),
+       col=c(4,3),lwd=c(3,3),lty=c(1,1))
+```
+
+```{r}
+all.equal(NonParamLines::supsmu_fit(x,y,bass=0),supsmu(x,y,bass=0)$y)
+all.equal(NonParamLines::supsmu_fit(x,y,bass=4),supsmu(x,y,bass=4)$y)
+```
+
+\noindent Since the above code returns TRUE for all settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance. We now demonstrate the computational speed:
+
+```{r}
+NonParamLines_Implementation=function(x,y) {
+  return(NonParamLines::supsmu_fit(x,y,bass=0))
+}
+Existing_Implementation=function(x,y) {
+  return(supsmu(x,y,bass=0)$y)
+}
+plot(bench::mark(NonParamLines_Implementation(x,y),
+     Existing_Implementation(x,y)),type="boxplot")
+```
+
+\noindent The NonParamLines implementation is slower, which is expected since loops are unavoidable in the LOESS algorithm and the existing implementation uses C++.
 
 
 

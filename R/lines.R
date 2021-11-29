@@ -340,7 +340,7 @@ supsmu_fit=function(x,y,span=NULL,bass=0) {
     best_spans=best_spans+(J[1]-best_spans)*(ratio^(10-bass))
     best_spans=pmin(supsmu_fit_span(x,best_spans,span=0.2),500)
     yhat=Yhat[,2]-Yhat[,2]*(best_spans-J[2])/(J[1]-J[2])+Yhat[,1]*(best_spans-J[2])/(J[1]-J[2])
-    yhat[best_spans < J[2]]=Yhat[,3]*(1-(best_spans-J[3])/(J[2]-J[3]))+Yhat[,2]*((best_spans-J[3])/(J[2]-J[3]))
+    yhat[best_spans < J[2]]=Yhat[,3][best_spans < J[2]]*(1-(best_spans[best_spans < J[2]]-J[3])/(J[2]-J[3]))+Yhat[,2][best_spans < J[2]]*((best_spans[best_spans < J[2]]-J[3])/(J[2]-J[3]))
     yhat=supsmu_fit_span(x,yhat,span=0.05)
   }
   return(yhat)
