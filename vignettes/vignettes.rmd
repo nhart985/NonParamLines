@@ -126,46 +126,42 @@ plot(bench::mark(NonParamLines_Implementation(x,y),
 
 ```{r}
 set.seed(1)
-x=seq(0,10,length.out=1000)
-y=sin(x)+rnorm(1000,0,0.5)
-plot(x,y)
-lines(sort(x),supsmu_fit(x,y,bass=0),col=4,lwd=3)
-lines(sort(x),supsmu_fit(x,y,bass=4),col=3,lwd=3)
-legend("bottomright",legend=c("Bass=0","Bass=4"),
-       col=c(4,3),lwd=c(3,3),lty=c(1,1))
+x=(1:1000)
+y=x+rnorm(1000,5,500)
+plot(x,y,ylim=c(-1500,2050))
+lines(sort(x),NonParamLines::supsmu_fit(x,y),col=4,lwd=3)
 ```
 
 ```{r}
-all.equal(NonParamLines::supsmu_fit(x,y,bass=0),supsmu(x,y,bass=0)$y)
-all.equal(NonParamLines::supsmu_fit(x,y,bass=4),supsmu(x,y,bass=4)$y)
+all.equal(NonParamLines::supsmu_fit(x,y),supsmu(x,y)$y)
 ```
 
 \subsection*{Example 2: A More Complicated Relationship}
 
 ```{r}
 set.seed(1)
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-plot(x,y,ylim=c(-4,2.5))
-lines(sort(x),supsmu_fit(x,y,bass=0),col=4,lwd=3)
-lines(sort(x),supsmu_fit(x,y,bass=4),col=3,lwd=3)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
+plot(x,y)
+lines(sort(x),NonParamLines::supsmu_fit(x,y,bass=4),col=4,lwd=3)
+lines(sort(x),NonParamLines::supsmu_fit(x,y),col=3,lwd=3)
 legend("bottomright",legend=c("Bass=0","Bass=4"),
        col=c(4,3),lwd=c(3,3),lty=c(1,1))
 ```
 
 ```{r}
-all.equal(NonParamLines::supsmu_fit(x,y,bass=0),supsmu(x,y,bass=0)$y)
 all.equal(NonParamLines::supsmu_fit(x,y,bass=4),supsmu(x,y,bass=4)$y)
+all.equal(NonParamLines::supsmu_fit(x,y),supsmu(x,y)$y)
 ```
 
 \noindent Since the above code returns TRUE for all settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance. We now demonstrate the computational speed:
 
 ```{r}
 NonParamLines_Implementation=function(x,y) {
-  return(NonParamLines::supsmu_fit(x,y,bass=0))
+  return(NonParamLines::supsmu_fit(x,y))
 }
 Existing_Implementation=function(x,y) {
-  return(supsmu(x,y,bass=0)$y)
+  return(supsmu(x,y)$y)
 }
 plot(bench::mark(NonParamLines_Implementation(x,y),
      Existing_Implementation(x,y)),type="boxplot")

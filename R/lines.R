@@ -337,7 +337,9 @@ supsmu_fit=function(x,y,span=NULL,bass=0) {
     best_rhat=pmin(fitsr[,1],fitsr[,2],fitsr[,3])
     w_rhat=fitsr[,1]
     ratio=best_rhat/w_rhat
-    best_spans=best_spans+(J[1]-best_spans)*(ratio^(10-bass))
+    if(bass!=0) {
+      best_spans=best_spans+(J[1]-best_spans)*(ratio^(10-bass))
+    }
     best_spans=pmin(supsmu_fit_span(x,best_spans,span=0.2),500)
     yhat=Yhat[,2]-Yhat[,2]*(best_spans-J[2])/(J[1]-J[2])+Yhat[,1]*(best_spans-J[2])/(J[1]-J[2])
     yhat[best_spans < J[2]]=Yhat[,3][best_spans < J[2]]*(1-(best_spans[best_spans < J[2]]-J[3])/(J[2]-J[3]))+Yhat[,2][best_spans < J[2]]*((best_spans[best_spans < J[2]]-J[3])/(J[2]-J[3]))
@@ -346,7 +348,18 @@ supsmu_fit=function(x,y,span=NULL,bass=0) {
   return(yhat)
 }
 
+set.seed(1)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
 
+set.seed(1)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
 
+supsmu_fit(x,y,bass=1)
+supsmu(x,y,bass=1)$y
+plot(supsmu_fit(x,y,bass=1),supsmu(x,y,bass=1)$y)
+abline(0,1,col=2)
+all.equal(supsmu_fit(x,y,bass=0),supsmu(x,y,bass=0)$y)
 
 
