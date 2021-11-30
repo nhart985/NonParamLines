@@ -126,6 +126,8 @@ supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
 #'@param J The span value times the total number of datapoints
 #'@param C The C term used for regression estimation (Friedman, 1984)
 #'@param V The V term used for regression estimation (Friedman, 1984)
+#'@param x_bar The mean of x in the previous local sample
+#'@param y_bar The mean of y in the previous local sample
 #'@param index The index of the current prediction point
 #'
 #'@return A vector with four elements: (1) C term, (2) V term, (3) Local x average, and (4) Local y average
@@ -213,7 +215,7 @@ supsmu_fit_span=function(x,y,span=0.2) {
 #'@examples
 #'x=(1:1000)
 #'y=x+rnorm(1000,5,500)
-#'get_inital_values(x,y)
+#'get_initial_values(x,y)
 #'
 #'
 #'@details
