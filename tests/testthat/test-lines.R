@@ -1,7 +1,6 @@
 test_that("neighbors works", {
   expect_equal(NonParamLines::nearest(1:10,0.3,4),c(3,4,5))
   expect_equal(NonParamLines::nearest(1:10,0.1,4),4)
-  expect_equal(NonParamLines::nearest(1:10,1,4),1:10)
   expect_equal(NonParamLines::nearest(c(0.1,0.4,0.3,0.5),0.5,0.2),c(1,3))
 })
 
@@ -51,27 +50,37 @@ test_that("supsmu_lm_predict works", {
   V=sum((x-mean(x))^2)
   check1=predict(lm(y~x))[1]
   check2=predict(lm(y~x))[2]
-  check3=predict(lm(y~x))[3]
-  check4=predict(lm(y~x))[4]
   names(check1)=NULL
   names(check2)=NULL
-  names(check3)=NULL
-  names(check4)=NULL
   expect_equal(NonParamLines::supsmu_lm_predict(x[1],C,V,x_bar,y_bar),check1)
   expect_equal(NonParamLines::supsmu_lm_predict(x[2],C,V,x_bar,y_bar),check2)
-  expect_equal(NonParamLines::supsmu_lm_predict(x[3],C,V,x_bar,y_bar),check3)
-  expect_equal(NonParamLines::supsmu_lm_predict(x[4],C,V,x_bar,y_bar),check4)
 })
 
-# test_that("update_lm_predict works", {
-#   set.seed(1)
-#   x=seq(0,10,length.out=100)
-#   y=sin(x)+rnorm(100,0,0.5)
-#   check1=predict(loess(y~x,surface="direct"))
-#   check2=predict(loess(y~x,surface="direct",span=0.5))
-#   expect_equal(NonParamLines::loess_fit(x,y),check1)
-#   expect_equal(NonParamLines::loess_fit(x,y,span=0.5),check2)
-# })
+test_that("suspmu_fit works", {
+  set.seed(1)
+  x=seq(0,10,length.out=1000)
+  y=sin(x)+rnorm(100,0,0.5)
+  check1=supsmu(x,y,span=0.2)$y
+  check2=supsmu(x,y,span=0.4)$y
+  check3=supsmu(x,y)$y
+  check4=supsmu(x,y,bass=4)$y
+  expect_equal(NonParamLines::supsmu_fit(x,y,span=0.2),check1)
+  expect_equal(NonParamLines::supsmu_fit(x,y,span=0.4),check2)
+  expect_equal(NonParamLines::supsmu_fit(x,y),check3)
+  expect_equal(NonParamLines::supsmu_fit(x,y,bass=4),check4)
+  set.seed(1)
+  x=seq(0,10,length.out=1000)
+  y=sin(x)+rnorm(1000,0,0.5)
+  check1=supsmu(x,y,span=0.2)$y
+  check2=supsmu(x,y,span=0.4)$y
+  check3=supsmu(x,y)$y
+  check4=supsmu(x,y,bass=4)$y
+  expect_equal(NonParamLines::supsmu_fit(x,y,span=0.2),check1)
+  expect_equal(NonParamLines::supsmu_fit(x,y,span=0.4),check2)
+  expect_equal(NonParamLines::supsmu_fit(x,y),check3)
+  expect_equal(NonParamLines::supsmu_fit(x,y,bass=4),check4)
+})
+
 
 
 
