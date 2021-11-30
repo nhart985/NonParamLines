@@ -22,7 +22,7 @@ Helper function for supsmu_fit(): Fits super smoothers corresponding to spans of
 \examples{
 x=(1:1000)
 y=x+rnorm(1000,5,500)
-supsmu_three_span(x,y)
+supsmu_fit_three_span(x,y)
 
 
 }

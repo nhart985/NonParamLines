@@ -36,6 +36,6 @@ See Friedman, 1984 for details.
 x=(1:1000)
 y=x+rnorm(1000,5,500)
 u=get_initial_values(x,y)
-u=update_lm_predict(x,y,u[1],u[2],u[3],u[4],2)
+u=update_lm_predict(x,y,200,u[1],u[2],u[3],u[4],2)
 
 }
