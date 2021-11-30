@@ -23,7 +23,7 @@ See Friedman, 1984 for details.
 \examples{
 x=(1:1000)
 y=x+rnorm(1000,5,500)
-get_inital_values(x,y)
+get_initial_values(x,y)
 
 
 }

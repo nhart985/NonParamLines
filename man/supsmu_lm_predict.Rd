@@ -26,7 +26,7 @@ Helper function for supsmu_fit(): Computes a prediction from the estimated local
 \examples{
 x=(1:1000)
 y=x+rnorm(1000,5,500)
-u=get_inital_values(x,y)
+u=get_initial_values(x,y)
 supsmu_lm_predict(x[1],u[1],u[2],u[3],u[4])
 
 

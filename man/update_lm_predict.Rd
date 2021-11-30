@@ -17,6 +17,10 @@ update_lm_predict(x, y, J, C, V, x_bar, y_bar, index)
 
 \item{V}{The V term used for regression estimation (Friedman, 1984)}
 
+\item{x_bar}{The mean of x in the previous local sample}
+
+\item{y_bar}{The mean of y in the previous local sample}
+
 \item{index}{The index of the current prediction point}
 }
 \value{
@@ -31,7 +35,7 @@ See Friedman, 1984 for details.
 \examples{
 x=(1:1000)
 y=x+rnorm(1000,5,500)
-u=get_inital_values(x,y)
+u=get_initial_values(x,y)
 u=update_lm_predict(x,y,u[1],u[2],u[3],u[4],2)
 
 }

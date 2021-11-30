@@ -1,4 +1,3 @@
-
 #'nearest
 #'
 #'Helper function for loess_fit(): Finds the indices of the span*N nearest neighbors to a given x value, where N is the total number of datapoints
