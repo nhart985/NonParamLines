@@ -2,22 +2,22 @@
 title: "NonParamLines Vignette"
 author: "Nicholas Hartman"
 date: "11/23/2021"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_document
 vignette: >
     %\VignetteIndexEntry{NonParamLines Vignette}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8} 
 ---
 
-\section{Loading the NonParamLines Package}
+# Loading the NonParamLines Package
 
 ```{r, message=F, results='hide'}
 devtools::install_github("nhart985/NonParamLines")
 ```
 
-\section{LOESS Smoother (Cleveland, 1979)}
+# LOESS Smoother (Cleveland, 1979)
 
-\subsection{Example 1: Cars Data from the stats Package}
+## Example 1: Cars Data from the stats Package
 
 \noindent The smooth predictions from the loess_fit() function can be plotted on top of the data to show the general trend of the data. Here is a comparison with the loess function from the stats package in R: 
 
@@ -57,7 +57,7 @@ plot(bench::mark(NonParamLines_Implementation(x,y),
 
 \noindent The NonParamLines implementation is about 10 times slower, which is expected since loops are unavoidable in the LOESS algorithm and the existing implementation uses C++. 
 
-\subsection{Example 2: A More Complicated Relationship}
+## Example 2: A More Complicated Relationship
 
 \noindent In this next example, we apply the loess_fit() function to data which has a more interesting shape. We also explore the impact of changing the degree and span parameters. The former determines if local linear or quadratic models are fit (default is quadratic) and the latter determines what proportion of the data is included in each local fit:
 
@@ -82,10 +82,11 @@ all.equal(NonParamLines::loess_fit(x,y,degree=1,span=0.5),
           predict(stats::loess(y~x,,degree=1,span=0.5,surface="direct")))
 ```
 
-\noindent Since the above code returns TRUE for both settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance. 
-\section{Friedman's Super Smoother (Friedman, 1984) with Fixed Span}
+\noindent Since the above code returns TRUE for both settings, it indicates that the predictions are equal to the existing implementation within a very minor tolerance.
 
-\subsection{Example}
+# Friedman's Super Smoother (Friedman, 1984) with Fixed Span
+
+## Example
 
 \noindent We use Example 2 from the previous section to demonstrate the supsmu_fit() function and the span argument usage:
 
@@ -122,11 +123,11 @@ plot(bench::mark(NonParamLines_Implementation(x,y),
 
 \noindent The NonParamLines implementation is slower, which is expected since loops are unavoidable in the LOESS algorithm and the existing implementation uses C++. 
 
-\section{Friedman's Super Smoother (Friedman, 1984) with Variable Span}
+# Friedman's Super Smoother (Friedman, 1984) with Variable Span
 
 \noindent We now demonstrate the supsmu_fit() function using a variable span (leaving the span argument as NULL) and different choices of the bass argument:
 
-\subsection{Example 1: A Weak Linear Relationship}
+## Example 1: A Weak Linear Relationship
 
 ```{r}
 set.seed(1)
@@ -140,7 +141,7 @@ lines(sort(x),NonParamLines::supsmu_fit(x,y),col=4,lwd=3)
 all.equal(NonParamLines::supsmu_fit(x,y),supsmu(x,y)$y)
 ```
 
-\subsection*{Example 2: A More Complicated Relationship}
+## Example 2: A More Complicated Relationship
 
 ```{r}
 set.seed(1)
