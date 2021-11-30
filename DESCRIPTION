@@ -5,13 +5,13 @@ Version: 0.1.0
 Author: Nicholas Hartman
 Maintainer: Nicholas Hartman <nhar@umich.edu>
 Description: Fits two of the most popular local linear smoothers using nonparametric estimation: LOESS (Cleveland, 1979) and Friedman's super smoother (Friedman, 1984).
-License: What license is it under?
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Suggests: 
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
-vignetteBuilder: knitr
+VignetteBuilder: knitr
 RoxygenNote: 7.1.2
 Config/testthat/edition: 3
