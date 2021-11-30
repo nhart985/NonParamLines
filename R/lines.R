@@ -106,7 +106,7 @@ loess_fit=function(x,y,degree=2,span=0.75) {
 #'@examples
 #'x=(1:1000)
 #'y=x+rnorm(1000,5,500)
-#'u=get_inital_values(x,y)
+#'u=get_initial_values(x,y)
 #'supsmu_lm_predict(x[1],u[1],u[2],u[3],u[4])
 #'
 #'
@@ -135,7 +135,7 @@ supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
 #'@examples
 #'x=(1:1000)
 #'y=x+rnorm(1000,5,500)
-#'u=get_inital_values(x,y)
+#'u=get_initial_values(x,y)
 #'u=update_lm_predict(x,y,u[1],u[2],u[3],u[4],2)
 #'
 #'@details
