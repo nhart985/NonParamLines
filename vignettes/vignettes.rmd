@@ -12,6 +12,8 @@ vignette: >
 \section{Loading the NonParamLines Package}
 
 ```{r, message=F, results='hide'}
+install.packages("devtools")
+install.packages("bench")
 devtools::install_github("nhart985/NonParamLines")
 ```
 
