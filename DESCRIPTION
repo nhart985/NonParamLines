@@ -14,7 +14,8 @@ Suggests:
     testthat (>= 3.0.0),
     devtools,
     bench,
-    ggplot2
+    ggplot2,
+    tidyr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.2
 Config/testthat/edition: 3
