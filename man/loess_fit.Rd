@@ -22,8 +22,11 @@ A numeric vector of LOESS predictions for the y variable at each value of the x 
 Computes LOESS local polynomial predictions (Cleveland, 1979)
 }
 \examples{
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-loess_fit(x,y,degree=2,span=0.75)
+set.seed(1)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
+loess_fit(x,y,span=0.2,degree=2)
+loess_fit(x,y,span=0.5,degree=1)
+
 
 }

@@ -19,10 +19,3 @@ N is the total number of datapoints.
 \description{
 Helper function for supsmu_fit(): Fits super smoothers corresponding to spans of 0.5,0.2, and 0.05 with only one loop
 }
-\examples{
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-supsmu_fit_three_span(x,y)
-
-
-}

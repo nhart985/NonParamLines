@@ -20,10 +20,3 @@ Helper function for supsmu_fit(): Computes the terms needed to estimate the firs
 \details{
 See Friedman, 1984 for details.
 }
-\examples{
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-get_initial_values(x,y)
-
-
-}

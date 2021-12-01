@@ -23,11 +23,3 @@ A scalar prediction of the y variable at x_point
 \description{
 Helper function for supsmu_fit(): Computes a prediction from the estimated local linear regression
 }
-\examples{
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-u=get_initial_values(x,y)
-supsmu_lm_predict(x[1],u[1],u[2],u[3],u[4])
-
-
-}

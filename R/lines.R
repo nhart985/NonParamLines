@@ -7,17 +7,13 @@
 #'
 #'@return A vector of indices
 #'
-#'@examples
-#'x=rnorm(100)
-#'nearest(x,0.75,x[1])
 #'
 #'
-#'@export
 #'
 nearest=function(x,span,x_point) {
   N=length(x)
-  J=trunc(span*N)
-  abs_diff=abs(x-x_point)
+  J=trunc(span*N) #number of neighbors
+  abs_diff=abs(x-x_point) #get differences, vectorized
   abs_diff_min=sort(abs_diff)[1:J]
   return(which(abs_diff %in% abs_diff_min))
 }
@@ -38,15 +34,6 @@ nearest=function(x,span,x_point) {
 #'When degree=2, an intercept, linear term, and quadratic term for x are included in the model.
 #'Predictions are made at x_point using the resulting estimates. See Cleveland, 1979 for details.
 #'
-#'@examples
-#'x=rnorm(100)
-#'y=x+rnorm(1000,5,500)
-#'nearest_indices=nearest(x,0.75,x[1])
-#'x_sub=x[nearest_indices]
-#'y_sub=y[nearest_indices]
-#'loess_lm_predict(x_sub,y_sub,2,x[1])
-#'
-#'@export
 #'
 loess_lm_predict=function(x,y,degree,x_point) {
   dist=abs(x-x_point)
@@ -54,10 +41,10 @@ loess_lm_predict=function(x,y,degree,x_point) {
   W=diag(w)
   N=length(x)
   if(degree==1) {
-    X=matrix(c(rep(1,N),x),nrow=N,ncol=2)
+    X=matrix(c(rep(1,N),x),nrow=N,ncol=2) #linear term only design matrix
     x_index=c(1,x_point)
   }else if (degree==2) {
-    X=matrix(c(rep(1,N),x,x^2),nrow=N,ncol=3)
+    X=matrix(c(rep(1,N),x,x^2),nrow=N,ncol=3) #linear and quadratic terms design matrix
     x_index=c(1,x_point,x_point^2)
   }
   beta=(solve(t(X)%*%W%*%X)%*%(t(X)%*%W%*%y))[,1]
@@ -74,10 +61,14 @@ loess_lm_predict=function(x,y,degree,x_point) {
 #'
 #'@return A numeric vector of LOESS predictions for the y variable at each value of the x variable
 #'
+#'
 #'@examples
-#'x=(1:1000)
-#'y=x+rnorm(1000,5,500)
-#'loess_fit(x,y,degree=2,span=0.75)
+#'set.seed(1)
+#'x=seq(0,10,length.out=1000)
+#'y=sin(x)+rnorm(1000,0,0.5)
+#'loess_fit(x,y,span=0.2,degree=2)
+#'loess_fit(x,y,span=0.5,degree=1)
+#'
 #'
 #'@export
 #'
@@ -85,8 +76,8 @@ loess_fit=function(x,y,degree=2,span=0.75) {
   N=length(x)
   yhat=rep(0,N)
   for(i in 1:N) {
-    neighbors=nearest(x,span,x[i])
-    yhat[i]=loess_lm_predict(x[neighbors],y[neighbors],degree,x[i])
+    neighbors=nearest(x,span,x[i]) #find nearest neighbors for local fit
+    yhat[i]=loess_lm_predict(x[neighbors],y[neighbors],degree,x[i]) #do local fit, predict
   }
   return(yhat)
 }
@@ -102,14 +93,7 @@ loess_fit=function(x,y,degree=2,span=0.75) {
 #'
 #'@return A scalar prediction of the y variable at x_point
 #'
-#'@examples
-#'x=(1:1000)
-#'y=x+rnorm(1000,5,500)
-#'u=get_initial_values(x,y)
-#'supsmu_lm_predict(x[1],u[1],u[2],u[3],u[4])
 #'
-#'
-#'@export
 #'
 supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
   beta1=(C/V)
@@ -131,29 +115,22 @@ supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
 #'
 #'@return A vector with four elements: (1) C term, (2) V term, (3) Local x average, and (4) Local y average
 #'
-#'@examples
-#'x=(1:1000)
-#'y=x+rnorm(1000,5,500)
-#'u=get_initial_values(x,y)
-#'u=update_lm_predict(x,y,200,u[1],u[2],u[3],u[4],2)
-#'
 #'@details
 #'See Friedman, 1984 for details.
 #'
-#'@export
 #'
 update_lm_predict=function(x,y,J,C,V,x_bar,y_bar,index) {
-  J_half=J%/%2
+  J_half=J%/%2 #half the number of local datapoints
   N=length(x)
   if(index > J_half+1 & index < N-J_half+1) {
     x_bar_temp=((J+1)*x_bar-x[index-J_half-1])/J
     y_bar_temp=((J+1)*y_bar-y[index-J_half-1])/J
-    C=C-x[index-J_half-1]*y[index-J_half-1]+(J+1)*x_bar*y_bar-J*x_bar_temp*y_bar_temp
-    V=V-x[index-J_half-1]^2+(J+1)*x_bar^2-J*x_bar_temp^2
-    x_bar=((J+1)*x_bar+x[index+J_half]-x[index-J_half-1])/(J+1)
+    C=C-x[index-J_half-1]*y[index-J_half-1]+(J+1)*x_bar*y_bar-J*x_bar_temp*y_bar_temp #remove old point
+    V=V-x[index-J_half-1]^2+(J+1)*x_bar^2-J*x_bar_temp^2 #remove old point
+    x_bar=((J+1)*x_bar+x[index+J_half]-x[index-J_half-1])/(J+1) #update x_bar with new point y_bar, remove old point
     y_bar=((J+1)*y_bar+y[index+J_half]-y[index-J_half-1])/(J+1)
-    C=C+((J+1)/J)*(x[index+J_half]-x_bar)*(y[index+J_half]-y_bar)
-    V=V+((J+1)/J)*(x[index+J_half]-x_bar)^2
+    C=C+((J+1)/J)*(x[index+J_half]-x_bar)*(y[index+J_half]-y_bar) #add new point
+    V=V+((J+1)/J)*(x[index+J_half]-x_bar)^2 #add new point
   }
   return(c(C,V,x_bar,y_bar))
 }
@@ -167,17 +144,11 @@ update_lm_predict=function(x,y,J,C,V,x_bar,y_bar,index) {
 #'
 #'@return A numeric vector of super smoother predictions for the y variable at each value of the x variable (sorted by the x variable)
 #'
-#'@examples
-#'x=(1:1000)
-#'y=x+rnorm(1000,5,500)
-#'supsmu_fit_span(x,y,span=0.2)
-#'
 #'
 #'@details
 #'This function is the workhorse of supsmu_fit() if a fixed span is requested.
 #'Otherwise, it serves as an intermediate helper function in the variable span algorithm (Friedman, 1984).
 #'
-#'@export
 #'
 supsmu_fit_span=function(x,y,span=0.2) {
   y=y[order(x)]
@@ -193,12 +164,12 @@ supsmu_fit_span=function(x,y,span=0.2) {
   yhat=rep(0,N)
   yhat[1]=supsmu_lm_predict(x[1],C,V,x_bar,y_bar)
   for(i in 2:N) {
-    u=update_lm_predict(x,y,J,C,V,x_bar,y_bar,i)
+    u=update_lm_predict(x,y,J,C,V,x_bar,y_bar,i) #update local estimates with new point, remove old point
     C=u[1]
     V=u[2]
     x_bar=u[3]
     y_bar=u[4]
-    yhat[i]=supsmu_lm_predict(x[i],C,V,x_bar,y_bar)
+    yhat[i]=supsmu_lm_predict(x[i],C,V,x_bar,y_bar) #predict with updated estimates
   }
   return(yhat)
 }
@@ -211,16 +182,10 @@ supsmu_fit_span=function(x,y,span=0.2) {
 #'
 #'@return A vector with four elements: (1) C term, (2) V term, (3) Local x average, and (4) Local y average
 #'
-#'@examples
-#'x=(1:1000)
-#'y=x+rnorm(1000,5,500)
-#'get_initial_values(x,y)
-#'
 #'
 #'@details
 #'See Friedman, 1984 for details.
 #'
-#'@export
 #'
 get_initial_values=function(x,y) {
   x_bar=mean(x)
@@ -240,19 +205,13 @@ get_initial_values=function(x,y) {
 #'(2) an Nx3 matrix of local x averages for each span, and (3) an Nx3 matrix of V terms for each span (Friedman, 1984).
 #'N is the total number of datapoints.
 #'
-#'@examples
-#'x=(1:1000)
-#'y=x+rnorm(1000,5,500)
-#'supsmu_fit_three_span(x,y)
 #'
-#'
-#'@export
 #'
 supsmu_fit_three_span=function(x,y) {
   y=y[order(x)]
   x=sort(x)
   N=length(x)
-  J1=trunc(0.5*N)
+  J1=trunc(0.5*N) #keep track of 3 different spans with one loop
   J2=trunc(0.2*N)
   J3=trunc(0.05*N)
   x_sub1=x[1:(J1+1)]
@@ -276,12 +235,12 @@ supsmu_fit_three_span=function(x,y) {
   yhat3[1]=supsmu_lm_predict(x[1],u3[1],u3[2],u3[3],u3[4])
   for(i in 2:N) {
     u1=update_lm_predict(x,y,J1,u1[1],u1[2],u1[3],u1[4],i)
-    u2=update_lm_predict(x,y,J2,u2[1],u2[2],u2[3],u2[4],i)
+    u2=update_lm_predict(x,y,J2,u2[1],u2[2],u2[3],u2[4],i) #update all 3 estimates
     u3=update_lm_predict(x,y,J3,u3[1],u3[2],u3[3],u3[4],i)
     V[i,]=c(u1[2],u2[2],u3[2])
     Xbar[i,]=c(u1[3],u2[3],u3[3])
     yhat1[i]=supsmu_lm_predict(x[i],u1[1],u1[2],u1[3],u1[4])
-    yhat2[i]=supsmu_lm_predict(x[i],u2[1],u2[2],u2[3],u2[4])
+    yhat2[i]=supsmu_lm_predict(x[i],u2[1],u2[2],u2[3],u2[4]) #predict with updated estimates
     yhat3[i]=supsmu_lm_predict(x[i],u3[1],u3[2],u3[3],u3[4])
   }
   return(list(matrix(c(yhat1,yhat2,yhat3),nrow=N),V,Xbar))
@@ -316,35 +275,37 @@ supsmu_fit_three_span=function(x,y) {
 #'
 supsmu_fit=function(x,y,span=NULL,bass=0) {
   if(!is.null(span)) {
-    yhat=supsmu_fit_span(x,y,span)
+    yhat=supsmu_fit_span(x,y,span) #fixed span algorithm
   }
-  else {
+  else { #variable span algorithm
     y=y[order(x)]
     x=sort(x)
     N=length(x)
-    fit=supsmu_fit_three_span(x,y)
+    fit=supsmu_fit_three_span(x,y) #get initial smoothers from 3 different spans
     Yhat=fit[[1]]
     V=fit[[2]]
     Xbar=fit[[3]]
     X_diff=(matrix(rep(x,3),nrow=N)-Xbar)^2
     J=c(0.5,0.2,0.05)*N
-    den=t(1-(1/(J+1))-t(X_diff/V))
-    r=abs(y-Yhat)/den
-    fitr1=supsmu_fit_span(x,r[,1],span=0.2)
+    den=t(1-(1/(J+1))-t(X_diff/V)) #denominator used to calculate residual term
+    r=abs(y-Yhat)/den #absolute residual term
+    fitr1=supsmu_fit_span(x,r[,1],span=0.2) #smooth absolute residuals
     fitr2=supsmu_fit_span(x,r[,2],span=0.2)
     fitr3=supsmu_fit_span(x,r[,3],span=0.2)
     fitsr=matrix(c(fitr1,fitr2,fitr3),nrow=N)
-    best_spans=J[apply(fitsr,1,which.min)]
+    best_spans=J[apply(fitsr,1,which.min)] #select best span for each point
     best_rhat=pmin(fitsr[,1],fitsr[,2],fitsr[,3])
     w_rhat=fitsr[,1]
-    ratio=best_rhat/w_rhat
+    ratio=best_rhat/w_rhat #smoothing ratio
     if(bass!=0) {
-      best_spans=best_spans+(J[1]-best_spans)*(ratio^(10-bass))
+      best_spans=best_spans+(J[1]-best_spans)*(ratio^(10-bass)) #smooth with bass argument
     }
     best_spans=pmin(supsmu_fit_span(x,best_spans,span=0.2),500)
-    yhat=Yhat[,2]-Yhat[,2]*(best_spans-J[2])/(J[1]-J[2])+Yhat[,1]*(best_spans-J[2])/(J[1]-J[2])
+    yhat=Yhat[,2]-Yhat[,2]*(best_spans-J[2])/(J[1]-J[2])+Yhat[,1]*(best_spans-J[2])/(J[1]-J[2]) #linear interpolation
     yhat[best_spans < J[2]]=Yhat[,3][best_spans < J[2]]*(1-(best_spans[best_spans < J[2]]-J[3])/(J[2]-J[3]))+Yhat[,2][best_spans < J[2]]*((best_spans[best_spans < J[2]]-J[3])/(J[2]-J[3]))
-    yhat=supsmu_fit_span(x,yhat,span=0.05)
+    yhat=supsmu_fit_span(x,yhat,span=0.05) #final smooth
   }
   return(yhat)
 }
+
+

@@ -23,10 +23,3 @@ Helper function for supsmu_fit(): Fits a super smoother corresponding to the fix
 This function is the workhorse of supsmu_fit() if a fixed span is requested.
 Otherwise, it serves as an intermediate helper function in the variable span algorithm (Friedman, 1984).
 }
-\examples{
-x=(1:1000)
-y=x+rnorm(1000,5,500)
-supsmu_fit_span(x,y,span=0.2)
-
-
-}

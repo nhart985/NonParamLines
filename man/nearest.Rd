@@ -19,9 +19,3 @@ A vector of indices
 \description{
 Helper function for loess_fit(): Finds the indices of the span*N nearest neighbors to a given x value, where N is the total number of datapoints
 }
-\examples{
-x=rnorm(100)
-nearest(x,0.75,x[1])
-
-
-}

@@ -27,12 +27,3 @@ When degree=1, only an intercept and linear term for x are included in the model
 When degree=2, an intercept, linear term, and quadratic term for x are included in the model.
 Predictions are made at x_point using the resulting estimates. See Cleveland, 1979 for details.
 }
-\examples{
-x=rnorm(100)
-y=x+rnorm(1000,5,500)
-nearest_indices=nearest(x,0.75,x[1])
-x_sub=x[nearest_indices]
-y_sub=y[nearest_indices]
-loess_lm_predict(x_sub,y_sub,2,x[1])
-
-}
