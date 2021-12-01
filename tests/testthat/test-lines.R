@@ -6,10 +6,10 @@ test_that("loess_fit works", {
   set.seed(1)
   x=seq(0,10,length.out=100)
   y=sin(x)+rnorm(100,0,0.5)
-  check1=predict(loess(y~x,surface="direct"))
-  check2=predict(loess(y~x,surface="direct",span=0.5))
-  expect_equal(NonParamLines::loess_fit(x,y,degree=1,span=0.2),check1)
-  expect_equal(NonParamLines::loess_fit(x,y,degree=1,span=0.2),check2)
+  check1=predict(loess(y~x,surface="direct",degre=1,span=0.4))
+  check2=predict(loess(y~x,surface="direct",degree=1,span=0.4))
+  expect_equal(NonParamLines::loess_fit(x,y,degree=1,span=0.4),check1)
+  expect_equal(NonParamLines::loess_fit(x,y,degree=1,span=0.4),check2)
 })
 
 test_that("suspmu_fit works", {
