@@ -8,8 +8,8 @@ test_that("loess_fit works", {
   y=sin(x)+rnorm(100,0,0.5)
   check1=predict(loess(y~x,surface="direct"))
   check2=predict(loess(y~x,surface="direct",span=0.5))
-  expect_equal(NonParamLines::loess_fit(x,y),check1)
-  expect_equal(NonParamLines::loess_fit(x,y,span=0.5),check2)
+  expect_equal(NonParamLines::loess_fit(x,y,degree=1,span=0.2),check1)
+  expect_equal(NonParamLines::loess_fit(x,y,degree=1,span=0.2),check2)
 })
 
 test_that("suspmu_fit works", {
