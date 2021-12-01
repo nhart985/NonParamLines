@@ -5,8 +5,8 @@
 #'@param span The proportion of datapoints to include in the local fit
 #'@param x_point The x value that is used to predict a y value
 #'
-#'@return A vector of indices
 #'
+#'@return A vector of indices
 #'
 #'@noRd
 #'
