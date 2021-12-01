@@ -8,7 +8,7 @@
 #'@return A vector of indices
 #'
 #'
-#'
+#'@noRd
 #'
 nearest=function(x,span,x_point) {
   N=length(x)
@@ -34,6 +34,7 @@ nearest=function(x,span,x_point) {
 #'When degree=2, an intercept, linear term, and quadratic term for x are included in the model.
 #'Predictions are made at x_point using the resulting estimates. See Cleveland, 1979 for details.
 #'
+#'@noRd
 #'
 loess_lm_predict=function(x,y,degree,x_point) {
   dist=abs(x-x_point)
@@ -93,7 +94,7 @@ loess_fit=function(x,y,degree=2,span=0.75) {
 #'
 #'@return A scalar prediction of the y variable at x_point
 #'
-#'
+#'@noRd
 #'
 supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
   beta1=(C/V)
@@ -118,6 +119,7 @@ supsmu_lm_predict=function(x_point,C,V,x_bar,y_bar) {
 #'@details
 #'See Friedman, 1984 for details.
 #'
+#'@noRd
 #'
 update_lm_predict=function(x,y,J,C,V,x_bar,y_bar,index) {
   J_half=J%/%2 #half the number of local datapoints
@@ -149,6 +151,7 @@ update_lm_predict=function(x,y,J,C,V,x_bar,y_bar,index) {
 #'This function is the workhorse of supsmu_fit() if a fixed span is requested.
 #'Otherwise, it serves as an intermediate helper function in the variable span algorithm (Friedman, 1984).
 #'
+#'@noRd
 #'
 supsmu_fit_span=function(x,y,span=0.2) {
   y=y[order(x)]
@@ -186,6 +189,7 @@ supsmu_fit_span=function(x,y,span=0.2) {
 #'@details
 #'See Friedman, 1984 for details.
 #'
+#'@noRd
 #'
 get_initial_values=function(x,y) {
   x_bar=mean(x)
@@ -205,7 +209,7 @@ get_initial_values=function(x,y) {
 #'(2) an Nx3 matrix of local x averages for each span, and (3) an Nx3 matrix of V terms for each span (Friedman, 1984).
 #'N is the total number of datapoints.
 #'
-#'
+#'@noRd
 #'
 supsmu_fit_three_span=function(x,y) {
   y=y[order(x)]
