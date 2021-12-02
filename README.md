@@ -18,7 +18,3 @@ The R implementations in the NonParamLines package are slower than existing impl
 
 
 
-
-
-
-
