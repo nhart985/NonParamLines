@@ -11,8 +11,7 @@ The NonParamLines package provides implementations of two popular nonparametric 
 
 The R implementations in the NonParamLines package are slower than existing implementations in the stats package, which use Fortran and C++. This is expected since each algorithm require a loop, but all of the code within the loop is vectorized and efficient. See source code for details. 
 
-References
-----------
+REFERENCES
 
 Cleveland, W.S. (1979) Robust Locally Weighted Regression and Smoothing Scatterplots, Journal of the American Statistical Association, 74:368, 829-836, DOI: 10.1080/01621459.1979.10481038
 
