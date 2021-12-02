@@ -59,7 +59,7 @@ plot(bench::mark(NonParamLines_Implementation(x,y),
 
 ## Example 2: A More Complicated Relationship
 
-\noindent In this next example, we apply the loess_fit() function to data which has a more interesting shape. We also explore the impact of changing the degree and span parameters. The former determines if local linear or quadratic models are fit (default is quadratic) and the latter determines what proportion of the data is included in each local fit:
+\noindent In this next example, we apply the loess_fit() function to data which has a more interesting relationship. We also explore the impact of changing the degree and span parameters. The former determines if local linear or quadratic models are fit (default is quadratic) and the latter determines what proportion of the data is included in each local fit:
 
 ```{r, fig.height=5}
 set.seed(1)
