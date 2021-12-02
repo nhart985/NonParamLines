@@ -23,8 +23,8 @@ Computes LOESS local polynomial predictions (Cleveland, 1979)
 }
 \examples{
 set.seed(1)
-x=seq(0,10,length.out=1000)
-y=sin(x)+rnorm(1000,0,0.5)
+x=seq(0,10,length.out=100)
+y=sin(x)+rnorm(100,0,0.5)
 loess_fit(x,y,span=0.2,degree=2)
 loess_fit(x,y,span=0.5,degree=1)
 
