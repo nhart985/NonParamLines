@@ -70,7 +70,6 @@ loess_lm_predict=function(x,y,degree,x_point) {
 #'loess_fit(x,y,span=0.2,degree=2)
 #'loess_fit(x,y,span=0.5,degree=1)
 #'
-#'
 #'@export
 #'
 loess_fit=function(x,y,degree=2,span=0.75) {

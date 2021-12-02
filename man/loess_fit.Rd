@@ -28,5 +28,4 @@ y=sin(x)+rnorm(100,0,0.5)
 loess_fit(x,y,span=0.2,degree=2)
 loess_fit(x,y,span=0.5,degree=1)
 
-
 }
