@@ -63,8 +63,8 @@ plot(bench::mark(NonParamLines_Implementation(x,y),
 
 ```{r, fig.height=5}
 set.seed(1)
-x=seq(0,10,length.out=100)
-y=sin(x)+rnorm(100,0,0.5)
+x=seq(0,10,length.out=1000)
+y=sin(x)+rnorm(1000,0,0.5)
 par(mfrow=c(1,1))
 plot(x,y,ylim=c(-4,2.5))
 lines(x,NonParamLines::loess_fit(x,y),col=4,lwd=3) #Quadratic, Span=0.75
@@ -88,7 +88,7 @@ all.equal(NonParamLines::loess_fit(x,y,degree=1,span=0.5),
 
 ## Example
 
-\noindent We use an example similar to Example 2 from the previous section to demonstrate the supsmu_fit() function and the span argument usage:
+\noindent We use Example 2 from the previous section to demonstrate the supsmu_fit() function and the span argument usage:
 
 ```{r,fig.height=5}
 set.seed(1)
