@@ -15,7 +15,7 @@ test_that("loess_fit works", {
 test_that("suspmu_fit works", {
   set.seed(1)
   x=seq(0,10,length.out=1000)
-  y=sin(x)+rnorm(100,0,0.5)
+  y=sin(x)+rnorm(1000,0,0.5)
   check1=supsmu(x,y,span=0.2)$y
   check2=supsmu(x,y,span=0.4)$y
   check3=supsmu(x,y)$y
